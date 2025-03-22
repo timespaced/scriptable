@@ -7,6 +7,15 @@
 
 const now = new Date()
 
+// Get widget parameters - defaults set in options
+// Expected format "locale|refreshInterval|paddingLeft|paddingRight|spaceBetweenRows|spaceBetweenColumns"
+// Defaults (set in options) will be used if no parameters set, or a parameter value is missing
+// Examples
+//    "en-GB|90|-8|-8|4|2"
+//    "en-GB"
+//    "en-GB|90|||4|2"
+const prms = (args.widgetParameter || "").split("|");
+
 const options = {
 	//version is "User-Agent"
 	version: "Scriptable: NextF1RaceSchedule/3.0",
@@ -18,15 +27,17 @@ const options = {
 		title:	["HiraginoSans-W6", 9],
 		body:	["HiraginoSans-W4", 9]
 	},
-	// Edit this for column resize
+	// Column resize
 	padding:{
-		left:	-4,
-		right:	-4
+		left:	parseInt(prms[2] || -4),
+		right: parseInt(prms[3] || -4)
 	},
-	spaceBetweenRows: 2,
-	spaceBetweenColumns: 0,
-	//adjustable refresh time (less than 60 is ignored)
-	refreshLimitInMinutes: 60
+	spaceBetweenRows: parseInt(prms[4] || 2),
+	spaceBetweenColumns: parseInt(prms[5] || 0),
+	// refresh time (less than 60 is ignored)
+	refreshLimitInMinutes: parseInt(prms[1] || 60),
+	// date format
+	locale: prms[0] || "en-US"
 }
 
 //save cached data to 'Scriptable/f1RaceData/schedule.txt'
@@ -86,18 +97,18 @@ async function getRaceData(){
 }
 
 async function formatSessionDay(sessionDay) {
-    var options = { weekday: 'short' };
-    return sessionDay.toLocaleDateString('en-US', options);
+    var formatOptions = { weekday: 'short' };
+    return sessionDay.toLocaleDateString(options.locale, formatOptions);
 }
 
 async function formatSessionDate(sessionDate) {
-    var options = { month: 'numeric', day: 'numeric' };
-    return sessionDate.toLocaleDateString('en-US', options);
+    var formatOptions = { month: 'numeric', day: 'numeric' };
+    return sessionDate.toLocaleDateString(options.locale, formatOptions);
 }
 
 async function formatSessionTime(sessionTime) {
-    var options = { hour12: false, hour: '2-digit', minute:'2-digit' };
-    return sessionTime.toLocaleTimeString('en-US', options);
+    var formatOptions = { hour12: false, hour: '2-digit', minute:'2-digit' };
+    return sessionTime.toLocaleTimeString(options.locale, formatOptions);
 }
 
 async function createWidget() {
